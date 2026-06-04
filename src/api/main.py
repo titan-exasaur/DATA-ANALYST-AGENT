@@ -94,16 +94,13 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
 
                 yield sse(f"{agent_name} completed")
 
-            chart_html = []
+            chart_payload = []
 
             for chart in state.get("charts", []) or []:
-                chart_html.append(
+                chart_payload.append(
                     {
                         "title": chart["title"],
-                        "html": chart["fig"].to_html(
-                            full_html=False,
-                            include_plotlyjs="cdn",
-                        ),
+                        "figure": chart["fig"].to_json(),
                     }
                 )
 
@@ -112,7 +109,7 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
                     "success": True,
                     "report": state["final_report"],
                     "errors": state.get("errors", []),
-                    "charts": chart_html,
+                    "charts": chart_payload,
                 }
             )
 

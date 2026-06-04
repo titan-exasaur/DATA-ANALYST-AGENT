@@ -6,3 +6,6 @@ rough.py
 
 # cache
 __pycache__*
+
+# uploaded data
+uploads/
