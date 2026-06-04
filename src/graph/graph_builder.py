@@ -1,7 +1,7 @@
 from langgraph.graph import END, StateGraph
 
 from src.graph.state import AnalystState
-from src.graph.router import Router
+from src.graph.router import SupervisorRouter
 
 from src.agents.schema_agent import schema_analysis_agent
 from src.agents.cleaning_agent import data_cleaning_agent
@@ -16,7 +16,7 @@ def build_analyst_graph():
     Assembles the full multi-agent LangGraph graph.
     """
 
-    router = Router()
+    router = SupervisorRouter()
 
     graph = StateGraph(AnalystState)
 
@@ -33,7 +33,7 @@ def build_analyst_graph():
 
     graph.add_conditional_edges(
         "supervisor",
-        router.supervisor_router,
+        router.router,
         {
             "schema_analysis": "schema_analysis",
             "data_cleaning": "data_cleaning",
