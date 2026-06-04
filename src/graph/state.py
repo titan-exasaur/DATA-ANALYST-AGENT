@@ -25,5 +25,3 @@ class AnalystState(TypedDict):
 
     # ── Output -─
     final_report: Optional[str]           # Markdown report from Report Agent
-
-    print("AnalystState TypedDict defined ")
