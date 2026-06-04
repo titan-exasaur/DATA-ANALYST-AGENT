@@ -3,7 +3,7 @@ from src.data_ingestion.base_loader import BaseLoader
 
 
 class CSVLoader(BaseLoader):
-    def data(self, source: str) -> pd.DataFrame:
+    def load(self, source: str) -> pd.DataFrame:
         try:
             data = pd.read_csv(source)
         except Exception as e:

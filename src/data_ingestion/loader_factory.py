@@ -18,4 +18,4 @@ def load_uploaded_file(source: str):
     else:
         raise ValueError(f"Unsupported file type: {extension}")
 
-    return loader.data(source)
+    return loader.load(source)

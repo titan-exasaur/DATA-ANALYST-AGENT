@@ -32,7 +32,7 @@ class URLLoader(BaseLoader):
         except requests.RequestException as e:
             raise ConnectionError(f"Failed to connect to URL: {source}") from e
 
-    def data(self, source: str) -> pd.DataFrame:
+    def load(self, source: str) -> pd.DataFrame:
         """
         Loads CSV data from a given URL.
 
