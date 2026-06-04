@@ -9,7 +9,7 @@ class AnalystState(TypedDict):
     # ── Input ──
     user_query: str                        # Natural language question from user
     raw_data: Optional[pd.DataFrame]       # Original uploaded dataframe
-    file_path: Optional[str]               # Path to CSV/Excel (if file-based)
+    source: Optional[str]               # Path to CSV/Excel (if file-based)
 
     # ── Intermediate State ──
     schema_info: Optional[dict]            # Output of Schema Analysis Agent

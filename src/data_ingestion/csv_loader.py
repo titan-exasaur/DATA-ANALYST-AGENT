@@ -3,11 +3,11 @@ from src.data_ingestion.base_loader import BaseLoader
 
 
 class CSVLoader(BaseLoader):
-    def load_data(self, file_path: str) -> pd.DataFrame:
+    def data(self, source: str) -> pd.DataFrame:
         try:
-            data = pd.read_csv(file_path)
+            data = pd.read_csv(source)
         except Exception as e:
-            raise ValueError(f"Failed to load CSV file: {file_path}") from e
+            raise ValueError(f"Failed to load CSV file: {source}") from e
 
         if data.empty:
             raise ValueError("Uploaded CSV file is empty")

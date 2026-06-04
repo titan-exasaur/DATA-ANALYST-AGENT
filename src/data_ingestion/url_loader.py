@@ -1,24 +1,25 @@
-import pandas as pd
 import requests
+import pandas as pd
+from pathlib import Path
 from urllib.parse import urlparse
+from src.data_ingestion.base_loader import BaseLoader
 
-
-class URLLoader:
+class URLLoader(BaseLoader):
     def __init__(self, timeout: int = 10):
         self.timeout = timeout
 
-    def _is_valid_url(self, url: str) -> bool:
-        parsed_url = urlparse(url)
+    def _is_valid_url(self, source: str) -> bool:
+        parsed_url = urlparse(source)
 
         return (
             parsed_url.scheme in ["http", "https"]
             and parsed_url.netloc != ""
         )
 
-    def _check_url_accessible(self, url: str) -> None:
+    def _check_url_accessible(self, source: str) -> None:
         try:
             response = requests.head(
-                url,
+                source,
                 timeout=self.timeout,
                 allow_redirects=True
             )
@@ -29,28 +30,32 @@ class URLLoader:
                 )
 
         except requests.RequestException as e:
-            raise ConnectionError(f"Failed to connect to URL: {url}") from e
+            raise ConnectionError(f"Failed to connect to URL: {source}") from e
 
-    def load_data(self, url: str) -> pd.DataFrame:
+    def data(self, source: str) -> pd.DataFrame:
         """
         Loads CSV data from a given URL.
 
         Args:
-            url: HTTP/HTTPS URL pointing to a CSV file.
+            source: HTTP/HTTPS URL pointing to a CSV file.
 
         Returns:
             pd.DataFrame: Loaded dataset.
         """
 
-        if not self._is_valid_url(url):
-            raise ValueError(f"Invalid URL: {url}")
+        if not self._is_valid_url(source):
+            raise ValueError(f"Invalid URL: {source}")
 
-        self._check_url_accessible(url)
+        self._check_url_accessible(source)
 
+        ext = Path(urlparse(source).path).suffix.lower()
         try:
-            url_data = pd.read_csv(url)
+            if ext in (".xlsx", ".xls"):
+                url_data = pd.read_excel(source)
+            else:
+                url_data = pd.read_csv(source)   # default to CSV
         except Exception as e:
-            raise ValueError(f"Failed to load CSV data from URL: {url}") from e
+            raise ValueError(f"Failed to load data from URL: {source}") from e
 
         if url_data.empty:
             raise ValueError("Loaded dataset is empty")

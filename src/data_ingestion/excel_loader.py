@@ -3,11 +3,11 @@ from src.data_ingestion.base_loader import BaseLoader
 
 
 class XLSXLoader(BaseLoader):
-    def load_data(self, file_path: str) -> pd.DataFrame:
+    def data(self, source: str) -> pd.DataFrame:
         try:
-            data = pd.read_excel(file_path)
+            data = pd.read_excel(source)
         except Exception as e:
-            raise ValueError(f"Failed to load Excel file: {file_path}") from e
+            raise ValueError(f"Failed to load Excel file: {source}") from e
 
         if data.empty:
             raise ValueError("Uploaded Excel file is empty")
