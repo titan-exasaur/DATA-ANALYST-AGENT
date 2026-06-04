@@ -67,6 +67,14 @@ files = [
     "src/templates/index.html",
     "src/templates/result.html",
 
+    # Data Ingestion
+    "src/ingestion/__init__.py",
+    "src/ingestion/base_loader.py",      
+    "src/ingestion/csv_loader.py",        
+    "src/ingestion/excel_loader.py",       
+    "src/ingestion/url_loader.py",         
+    "src/ingestion/validator.py",
+
     # Tests
     "tests/__init__.py",
     "tests/conftest.py",
@@ -88,7 +96,8 @@ files = [
 
     # CI/CD
     ".github/workflows/ci.yml",
-    ".github/workflows/cd.yml",
+    ".github/workflows/cd.yml"
+      
 ]
 
 created_files = 0
