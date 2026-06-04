@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Data Analyst Agent</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <main class="container">
+        <section class="hero">
+            <h1>AI Data Analyst Agent</h1>
+            <p>Upload a CSV or Excel file and ask a data question.</p>
+        </section>
+
+        <section class="card">
+            <form id="analysisForm">
+                <label for="file">Dataset</label>
+                <input type="file" id="file" name="file" accept=".csv,.xlsx,.xls" required>
+
+                <label for="user_query">Question</label>
+                <textarea
+                    id="user_query"
+                    name="user_query"
+                    rows="4"
+                    placeholder="Example: What factors affected passenger survival?"
+                    required
+                ></textarea>
+
+                <button type="submit">Run Analysis</button>
+            </form>
+        </section>
+
+        <section class="card hidden" id="statusCard">
+            <h2>Agent Status</h2>
+            <ul id="statusList"></ul>
+        </section>
+
+        <section class="card hidden" id="reportCard">
+            <h2>Final Report</h2>
+            <pre id="reportOutput"></pre>
+        </section>
+
+        <section class="card hidden" id="chartsCard">
+            <h2>Charts</h2>
+            <div id="chartsOutput"></div>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
