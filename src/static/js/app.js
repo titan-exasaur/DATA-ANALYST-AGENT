@@ -37,9 +37,7 @@ form.addEventListener("submit", async function (event) {
         while (true) {
             const { value, done } = await reader.read();
 
-            if (done) {
-                break;
-            }
+            if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
 
@@ -47,9 +45,7 @@ form.addEventListener("submit", async function (event) {
             buffer = events.pop();
 
             for (const eventText of events) {
-                if (!eventText.startsWith("data: ")) {
-                    continue;
-                }
+                if (!eventText.startsWith("data: ")) continue;
 
                 const jsonText = eventText.replace("data: ", "");
                 const data = JSON.parse(jsonText);
@@ -90,11 +86,29 @@ function handleDone(data) {
     if (data.charts && data.charts.length > 0) {
         chartsCard.classList.remove("hidden");
 
-        data.charts.forEach(chart => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "chart-box";
-            wrapper.innerHTML = chart.html;
-            chartsOutput.appendChild(wrapper);
+        data.charts.forEach((chart, index) => {
+            const title = document.createElement("h3");
+            title.textContent = chart.title;
+            chartsOutput.appendChild(title);
+
+            const chartDiv = document.createElement("div");
+            chartDiv.className = "chart-box";
+            chartDiv.id = `chart-${index}`;
+            chartsOutput.appendChild(chartDiv);
+
+            const fig = JSON.parse(chart.figure);
+
+            if (typeof Plotly === "undefined") {
+                addStatus("Plotly library failed to load.");
+                return;
+            }
+
+            Plotly.newPlot(
+                chartDiv.id,
+                fig.data,
+                fig.layout,
+                { responsive: true }
+            );
         });
     }
 }
