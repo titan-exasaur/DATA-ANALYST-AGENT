@@ -12,15 +12,24 @@ from src.graph.state import AnalystState
 class ReportAgent:
     def __init__(self, llm=None):
         config = load_config()
-        settings = get_settings()
+        self.settings = get_settings()
 
         llm_config = config["llm"]
 
-        self.llm = llm or ChatOpenAI(
-            model=llm_config["model"],
-            temperature=llm_config["temperature"],
-            api_key=settings.openai_api_key,
-        )
+        self.llm = llm
+        self.llm_config = llm_config
+
+    def _get_llm(self):
+        if self.llm is None:
+            settings = get_settings()
+
+            self.llm = ChatOpenAI(
+                model=self.llm_config["model"],
+                temperature=self.llm_config["temperature"],
+                api_key=settings.openai_api_key,
+            )
+
+        return self.llm
 
     def run(self, state: AnalystState) -> AnalystState:
         log = "[Report Agent] Generating final report..."
@@ -72,7 +81,7 @@ class ReportAgent:
                 Be specific with numbers. Be direct. Max 400 words.
             """)
 
-            narrative_response = self.llm.invoke(
+            narrative_response = self._get_llm().invoke(
                 [
                     SystemMessage(content=system_prompt),
                     HumanMessage(content=context),
@@ -125,8 +134,6 @@ class ReportAgent:
             }
 
 
-report_agent_instance = ReportAgent()
-
 
 def report_agent(state: AnalystState) -> AnalystState:
-    return report_agent_instance.run(state)
+    return ReportAgent().run(state)

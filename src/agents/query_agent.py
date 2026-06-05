@@ -12,15 +12,24 @@ from src.graph.state import AnalystState
 class QueryPlanningAgent:
     def __init__(self, llm=None):
         config = load_config()
-        settings = get_settings()
+        self.settings = get_settings()
 
         llm_config = config["llm"]
 
-        self.llm = llm or ChatOpenAI(
-            model=llm_config["model"],
-            temperature=llm_config["temperature"],
-            api_key=settings.openai_api_key,
-        )
+        self.llm = llm
+        self.llm_config = llm_config
+
+    def _get_llm(self):
+        if self.llm is None:
+            settings = get_settings()
+
+            self.llm = ChatOpenAI(
+                model=self.llm_config["model"],
+                temperature=self.llm_config["temperature"],
+                api_key=settings.openai_api_key,
+            )
+
+        return self.llm
 
     def run(self, state: AnalystState) -> AnalystState:
         log = "[Query Planning Agent] Generating analysis plan..."
@@ -68,7 +77,7 @@ class QueryPlanningAgent:
             Write the Pandas analysis code:
             """
 
-            response = self.llm.invoke(
+            response = self._get_llm().invoke(
                 [
                     SystemMessage(content=system_prompt),
                     HumanMessage(content=user_prompt),
@@ -116,8 +125,6 @@ class QueryPlanningAgent:
         return code.strip()
 
 
-query_agent = QueryPlanningAgent()
-
 
 def query_planning_agent(state: AnalystState) -> AnalystState:
-    return query_agent.run(state)
+    return QueryPlanningAgent().run(state)

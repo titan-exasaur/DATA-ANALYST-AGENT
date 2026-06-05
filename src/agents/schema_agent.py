@@ -13,18 +13,26 @@ from src.graph.state import AnalystState
 class SchemaAgent:
     def __init__(self, llm=None):
         config = load_config()
-        settings = get_settings()
 
         llm_config = config["llm"]
+
+        self.llm = llm
+        self.llm_config = llm_config
 
         self.sample_values_count = config["schema_agent"]["sample_values_count"]
         self.high_null_threshold_pct = config["schema_agent"]["high_null_threshold_pct"]
 
-        self.llm = llm or ChatOpenAI(
-            model=llm_config["model"],
-            temperature=llm_config["temperature"],
-            api_key=settings.openai_api_key,
-        )
+    def _get_llm(self):
+        if self.llm is None:
+            settings = get_settings()
+
+            self.llm = ChatOpenAI(
+                model=self.llm_config["model"],
+                temperature=self.llm_config["temperature"],
+                api_key=settings.openai_api_key,
+            )
+
+        return self.llm
 
     def run(self, state: AnalystState) -> AnalystState:
         log = "[Schema Agent] Starting schema analysis..."
@@ -68,7 +76,7 @@ class SchemaAgent:
             {schema_json_str}
             """
 
-            response = self.llm.invoke(
+            response = self._get_llm().invoke(
                 [
                     SystemMessage(content=system_prompt),
                     HumanMessage(content=user_prompt),
@@ -141,6 +149,5 @@ class SchemaAgent:
 
 
 
-schema_agent = SchemaAgent()
 def schema_analysis_agent(state: AnalystState) -> AnalystState:
-    return schema_agent.run(state)
+    return SchemaAgent().run(state)
