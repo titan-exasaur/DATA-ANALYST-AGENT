@@ -1,7 +1,7 @@
 numpy 
 pandas
 matplotlib
-pyplot
+pltoly
 uvicorn
 fastapi
 pytest
