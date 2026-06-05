@@ -16,6 +16,11 @@ from src.agents.report_agent import ReportAgent
 from src.graph.state import AnalystState
 from src.data_ingestion.loader_factory import load_uploaded_file
 
+from src.db.models import FileMetadata, SessionMetadata
+from src.db.repositories.file_repo import FileRepository
+from src.db.repositories.session_repo import SessionRepository
+from src.storage.blob_client import azure_blob_client
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -47,13 +52,54 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
     with open(file_path, "wb") as buffer:
         buffer.write(await file.read())
 
-    def event_stream():
+    file_id = str(uuid.uuid4())
+
+    blob_name = f"{session_id}/{file.filename}"
+    try:
+        blob_url = azure_blob_client.upload_file(str(file_path), blob_name)
+    except Exception as e:
+        print(f"Blob upload failed: {e}")
+        blob_url = None
+
+    file_repo = FileRepository()
+    session_repo = SessionRepository()
+
+    print("Creating file metadata...")
+    await file_repo.create_file(
+        FileMetadata(
+            file_id=file_id,
+            session_id=session_id,
+            original_filename=file.filename,
+            local_path=str(file_path),
+            blob_url=blob_url,
+            file_size_bytes=file_path.stat().st_size,
+            file_extension=file_path.suffix.lower(),
+        )
+    )
+
+    print("File metadata created")
+
+
+    print("Creating session metadata...")
+    await session_repo.create_session(
+        SessionMetadata(
+            session_id=session_id,
+            user_query=user_query,
+            file_id=file_id,
+            status="running",
+        )
+    )
+    print("Session metadata created")
+
+    async def event_stream():
+        state = None
+
         try:
             yield sse("File uploaded successfully")
 
             df = load_uploaded_file(str(file_path))
 
-            state: AnalystState = {
+            state = {
                 "user_query": user_query,
                 "raw_data": df,
                 "source": str(file_path),
@@ -81,6 +127,15 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
                 state = agent.run(state)
 
                 if state.get("errors"):
+                    await session_repo.update_session_result(
+                        session_id=session_id,
+                        status="failed",
+                        agent_logs=state.get("agent_logs", []),
+                        errors=state.get("errors", []),
+                        final_report=state.get("final_report"),
+                        chart_titles=[],
+                    )
+
                     yield sse(f"{agent_name} failed")
                     yield sse_done(
                         {
@@ -104,6 +159,15 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
                     }
                 )
 
+            await session_repo.update_session_result(
+                session_id=session_id,
+                status="completed",
+                agent_logs=state.get("agent_logs", []),
+                errors=state.get("errors", []),
+                final_report=state.get("final_report"),
+                chart_titles=[chart["title"] for chart in state.get("charts", []) or []],
+            )
+
             yield sse_done(
                 {
                     "success": True,
@@ -114,6 +178,15 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
             )
 
         except Exception as e:
+            await session_repo.update_session_result(
+                session_id=session_id,
+                status="failed",
+                agent_logs=state.get("agent_logs", []) if state else [],
+                errors=[str(e)],
+                final_report=None,
+                chart_titles=[],
+            )
+
             yield sse_done(
                 {
                     "success": False,
@@ -124,7 +197,6 @@ async def analyse(file: UploadFile = File(...), user_query: str = Form(...)):
             )
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
-
 
 def sse(message: str) -> str:
     return f"data: {json.dumps({'type': 'status', 'message': message})}\n\n"
