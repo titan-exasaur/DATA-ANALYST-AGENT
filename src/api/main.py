@@ -21,6 +21,9 @@ from src.db.repositories.file_repo import FileRepository
 from src.db.repositories.session_repo import SessionRepository
 from src.storage.blob_client import azure_blob_client
 
+from dotenv import load_dotenv
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)

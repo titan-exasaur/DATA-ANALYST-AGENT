@@ -13,6 +13,7 @@ langchain-core
 langchain-openai
 langgraph
 openai
+langsmith
 
 pydantic
 pydantic-settings
