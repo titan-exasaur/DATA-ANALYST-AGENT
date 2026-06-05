@@ -4,3 +4,6 @@ pytest-cov
 
 black
 ruff
+pymongo
+motor
+azure-storage-blob

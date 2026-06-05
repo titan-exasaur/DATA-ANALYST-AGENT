@@ -17,11 +17,11 @@ class Settings(BaseSettings):
 
     # Azure Blob
     azure_storage_connection_string: str = Field(default="")
-    azure_storage_container_name: str = Field(default="analyst-uploads")
+    azure_storage_container_name: str = Field(default="uploaded-datasets")
 
     # MongoDB
     mongo_uri: str = Field(default="mongodb://localhost:27017")
-    mongo_db_name: str = Field(default="ai_analyst")
+    mongo_db_name: str = Field(default="ai_data_analyst_agent")
 
     # App
     app_env: str = Field(default="development")
