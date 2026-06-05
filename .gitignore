@@ -9,3 +9,6 @@ __pycache__*
 
 # uploaded data
 uploads/
+
+# recorded video
+demo/
