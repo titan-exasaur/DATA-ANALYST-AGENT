@@ -1,3 +1,9 @@
+numpy 
+pandas
+matplotlib
+pyplot
+uvicorn
+fastapi
 pytest
 pytest-asyncio
 pytest-cov
