@@ -1,24 +1,7 @@
-fastapi
-uvicorn
-jinja2
-python-multipart
+-r requirements.txt
 
-numpy
-pandas
-plotly
-requests
-openpyxl
-
-langchain-core
-langchain-openai
-langgraph
-openai
-
-pydantic
-pydantic-settings
-python-dotenv
-pyyaml
-
-pymongo
-motor
-azure-storage-blob
+pytest
+pytest-asyncio
+pytest-cov
+black
+ruff
